@@ -96,11 +96,7 @@
           flex-wrap: wrap;
           justify-content: center;
         }
-        /* preload all images */
-        body::after{
-          position:absolute; width:0; height:0; overflow:hidden; z-index:-1; // hide images
-          content:url(button_a.png) url(button_a_noshadow.png) url(button_b.png) url(button_b_noshadow.png) url(button_c.png) url(button_c_noshadow.png) url(button_d.png) url(button_d_noshadow.png) url(button_a_grey.png) url(button_b_grey.png) url(button_c_grey.png) url(button_d_grey.png) url(logo.png);
-        }
+
         body {
             margin: 0;
             padding: 0;
@@ -108,11 +104,9 @@
             text-align: center;
         }
 
-
-        }
         div#included-page {
             width: 900px;
-            text-align: left;
+            /*text-align: left;*/
             border: 0px;
             padding: 0;
             margin: 0 auto;
@@ -136,11 +130,49 @@
               document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
               if (first_time || state != previous_state) {
                 includeHTML();
-                first_time = false;
+                if (first_time) {
+                  first_time = false;
+                }
               }
-              doPageUpdate();
             })
         }
+
+        function doAJAXPost(url,data) {
+            let formData = new FormData();
+            for( let key in data ) {
+              let value = data[key];
+              formData.append(key, value);
+            }
+            let xhreq = new XMLHttpRequest();
+            xhreq.open('POST', url, true);
+            xhreq.onload = function () {
+              if (xhreq.status !== 200 /*OK*/){
+                return -1;
+              }
+              return this.responseText;
+            };
+            xhreq.send(formData);
+        }
+
+        function postAnswerIfDone() {
+          if (answer.length==4) {
+            doAJAXPost(buttonsClickedURL, {
+              player_name: detail,
+              question_number: question_number,
+              answer: answer
+            });
+          }
+        }
+
+        function clickAnswerButton(event) {
+          answer = `${answer}${event.target.dataset.letter}`;
+          event.target.classList.add('pressed');
+          event.target.style.cursor = "not-allowed";
+          //event.target.removeEventListener("mouseup",clickAnswerButton);
+          //event.target.removeEventListener("touchend",clickAnswerButton);
+          postAnswerIfDone();
+        }
+
         function doPageUpdate() {
             if (action == "play") {
                 if (state == "registration") {
@@ -159,27 +191,23 @@
                   // play/answering page
                   let buttonADiv = document.getElementById("buttonA");
                   if (buttonADiv) {
-                    buttonADiv.addEventListener("click", function() {
-                      buttonADiv.classList.add('pressed');
-                    });
+                    buttonADiv.addEventListener("mouseup", clickAnswerButton, {once:true});
+                    buttonADiv.addEventListener("touchend", clickAnswerButton, {once:true});
                   }
                   let buttonBDiv = document.getElementById("buttonB");
                   if (buttonBDiv) {
-                    buttonBDiv.addEventListener("click", function() {
-                      buttonBDiv.classList.add('pressed');
-                    });
+                    buttonBDiv.addEventListener("mouseup", clickAnswerButton, {once:true});
+                    buttonBDiv.addEventListener("touchend", clickAnswerButton, {once:true});
                   }
                   let buttonCDiv = document.getElementById("buttonC");
                   if (buttonCDiv) {
-                    buttonCDiv.addEventListener("click", function() {
-                      buttonCDiv.classList.add('pressed');
-                    });
+                    buttonCDiv.addEventListener("mouseup", clickAnswerButton, {once:true});
+                    buttonCDiv.addEventListener("touchend", clickAnswerButton, {once:true});
                   }
                   let buttonDDiv = document.getElementById("buttonD");
                   if (buttonDDiv) {
-                    buttonDDiv.addEventListener("click", function() {
-                      buttonDDiv.classList.add('pressed');
-                    });
+                    buttonDDiv.addEventListener("mouseup", clickAnswerButton, {once:true});
+                    buttonDDiv.addEventListener("touchend", clickAnswerButton, {once:true});
                   }
                 }
             }
@@ -194,6 +222,7 @@
                     if (this.readyState == 4 /*DONE*/) {
                         if (this.status == 200 /*OK*/) {
                             elmnt.innerHTML = this.responseText;
+                            doPageUpdate();
                         }
                         if (this.status == 404) {
                             elmnt.innerHTML = "Page not found.";
@@ -208,15 +237,18 @@
 
         let first_time = true;
         let pollURL = "<POLL_URL>";
+        let buttonsClickedURL = "<BUTTONS_CLICKED_URL>";
         let action = '<ACTION>';
         let state = '<STATE>';
+        let detail = '<DETAIL>';
+        let answer = "";
         let previous_state = state;
         let player_list = <PLAYER_LIST>; // it won't be bad syntax once substituted
         let question_number = '<QUESTION_NUMBER>';
         let number_of_players = '<NUMBER_OF_PLAYERS>';
-        let xhr = new XMLHttpRequest();
+        //let xhr = new XMLHttpRequest();
         // poll every 0.25 seconds
-        setInterval(doAJAXPoll, 250);
+        setInterval(doAJAXPoll, 2500); // TODO CHANGE to 250
     </script>
   </head>
   <body>
