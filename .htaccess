@@ -1,6 +1,7 @@
 RewriteEngine On
 RewriteBase /
 RewriteCond %{REQUEST_URI} !^html
+RewriteCond %{REQUEST_URI} !^img
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule ^(.+)$ index.php [QSA,L]

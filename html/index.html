@@ -1,47 +1,155 @@
 <!--
-//general routing and polling client side
+// general routing and polling client side
 
 // poll and check state
     if the state has changed
     import the content of <action>/<state>.html and run its javascript (maybe just have those as methods here)
-
 -->
-<div w3-include-html='/html/<ACTION>/<STATE>.html'></div>
-<script type="text/javascript">
-    function includeHTML() {
-        var z, i, elmnt, file, xhttp;
-        /*loop through a collection of all HTML elements:*/
-        z = document.getElementsByTagName("*");
-        for (i = 0; i < z.length; i++) {
-            elmnt = z[i];
-            /*search for elements with a certain attribute:*/
-            file = elmnt.getAttribute("w3-include-html");
-            if (file) {
-                /*make an HTTP request using the attribute value as the file name:*/
-                xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function() {
-                    if (this.readyState == 4) {
-                        if (this.status == 200) {elmnt.innerHTML = this.responseText;}
-                        if (this.status == 404) {elmnt.innerHTML = "Page not found.";}
-                        /*remove the attribute, and call this function once more:*/
-                        elmnt.removeAttribute("w3-include-html");
+<html>
+  <head>
+    <title>Fastest Finger First</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600&family=Montserrat+Alternates:wght@500;600&display=swap"
+          rel="stylesheet">
+    <style type="text/css">
+        h1, h2, h3, h4, h5, h6, p, span, div {
+            font-family: 'Montserrat Alternates', sans-serif;
+        }
+
+        html {
+            background-color: #f0f8ff;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            padding-top: 30px;
+            text-align: center;
+        }
+
+
+        }
+        div#included-page {
+            width: 900px;
+            text-align: left;
+            border: 0px;
+            padding: 0;
+            margin: 0 auto;
+        }  ​
+    </style>
+    <script type="text/javascript">
+        function doAJAXPoll() {
+            fetch(pollURL)
+            .then(response => response.text())
+            .catch(error => {
+              console.log('poll error')
+              console.log('Request failed.  Returned error:' + error);
+            })
+            .then(response => {
+              let data = JSON.parse(response);
+              previous_state = state;
+              state = data["state"];
+              question_number = data["question_number"];
+              number_of_players = data["number_of_players"];
+              player_list = data["player_list"];
+              document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
+              if (first_time || state != previous_state) {
+                includeHTML();
+                first_time = false;
+              }
+              doPageUpdate();
+            })
+
+            /*xhr.open('GET', pollURL);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    //console.log('response was:');
+                    //console.dir(xhr.responseText);
+                    let data = JSON.parse(xhr.responseText);
+                    previous_state = state;
+                    state = data["state"];
+                    question_number = data["question_number"];
+                    number_of_players = data["number_of_players"];
+                    player_list = data["player_list"];
+                    document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
+                    if (first_time || state != previous_state) {
                         includeHTML();
+                        first_time = false;
+                    }
+                    doPageUpdate();
+                } else {
+                    console.log('poll error')
+                    console.log('Request failed.  Returned status of ' + xhr.status);
+                }
+            };
+            xhr.send();*/
+        }
+        function doPageUpdate() {
+            if (action == "play") {
+                if (state == "registration") {
+                    // play/registration page
+                    let playerListDiv = document.getElementById("players");
+                    if (playerListDiv) {
+                      if (!player_list || player_list.length==0) {
+                        playerListDiv.innerText = "No-one yet.";
+                      }
+                      else {console.log(player_list);
+                        playerListDiv.innerText = player_list.join(", ");
+                      }
                     }
                 }
-                xhttp.open("GET", file, true);
-                xhttp.send();
-                /*exit the function:*/
-                return;
             }
         }
-    };
-    includeHTML();
+        function includeHTML() {
+            var z, i, elmnt, file, xhttp;
+            /*loop through a collection of all HTML elements:*/
+            z = document.getElementsByTagName("*");
+            for (i = 0; i < z.length; i++) {
+                elmnt = z[i];
+                /*search for elements with a certain attribute:*/
+                file = elmnt.getAttribute("w3-include-html");
+                if (file) {
+                    /*make an HTTP request using the attribute value as the file name:*/
+                    xhttp = new XMLHttpRequest();
+                    xhttp.onreadystatechange = function () {
+                        if (this.readyState == 4) {
+                            if (this.status == 200) {
+                                elmnt.innerHTML = this.responseText;
+                            }
+                            if (this.status == 404) {
+                                elmnt.innerHTML = "Page not found.";
+                            }
+                            /*remove the attribute, and call this function once more:*/
+                            elmnt.removeAttribute("w3-include-html");
+                            includeHTML();
+                        }
+                    }
+                    xhttp.open("GET", file, true);
+                    xhttp.send();
+                    /*exit the function:*/
+                    return;
+                }
+            }
+        };
 
-    let action ='<ACTION>';
-    let state = '<STATE>';
-    let playerList = <PLAYER_LIST>; // it won't be bad syntax once substituted
-    console.dir(playerList);
-    console.log(action,state);
-    let question_number = '<QUESTION_NUMBER>';
-    let number_of_players = '<NUMBER_OF_PLAYERS>';
-</script>
+        let first_time = true;
+        let pollURL = "<POLL_URL>";
+        let action = '<ACTION>';
+        let state = '<STATE>';
+        let previous_state = state;
+        let player_list = <PLAYER_LIST>; // it won't be bad syntax once substituted
+        //console.dir(player_list);
+        //console.log(action,state);
+        let question_number = '<QUESTION_NUMBER>';
+        let number_of_players = '<NUMBER_OF_PLAYERS>';
+        let xhr = new XMLHttpRequest();
+        //document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
+        //includeHTML();
+        //doPageUpdate();
+        // poll every 3 seconds
+        setInterval(doAJAXPoll, 250);
+    </script>
+  </head>
+  <body>
+    <div id="included-page"></div><!-- w3-include-html='/html/<ACTION>/<STATE>.html' -->
+  </body>
+</html>
