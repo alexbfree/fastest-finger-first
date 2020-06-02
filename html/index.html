@@ -140,30 +140,6 @@
               }
               doPageUpdate();
             })
-
-            /*xhr.open('GET', pollURL);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    //console.log('response was:');
-                    //console.dir(xhr.responseText);
-                    let data = JSON.parse(xhr.responseText);
-                    previous_state = state;
-                    state = data["state"];
-                    question_number = data["question_number"];
-                    number_of_players = data["number_of_players"];
-                    player_list = data["player_list"];
-                    document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
-                    if (first_time || state != previous_state) {
-                        includeHTML();
-                        first_time = false;
-                    }
-                    doPageUpdate();
-                } else {
-                    console.log('poll error')
-                    console.log('Request failed.  Returned status of ' + xhr.status);
-                }
-            };
-            xhr.send();*/
         }
         function doPageUpdate() {
             if (action == "play") {
@@ -174,8 +150,9 @@
                       if (!player_list || player_list.length==0) {
                         playerListDiv.innerText = "No-one yet.";
                       }
-                      else {console.log(player_list);
-                        playerListDiv.innerText = player_list.join(", ");
+                      else {
+                        let niceNames = player_list.map(function(x) { return x.substr(0, 1).toUpperCase() + x.substr(1); });
+                        playerListDiv.innerText = niceNames.join(", ");
                       }
                     }
                 } else if (state == "answering") {
@@ -208,34 +185,24 @@
             }
         }
         function includeHTML() {
-            var z, i, elmnt, file, xhttp;
-            /*loop through a collection of all HTML elements:*/
-            z = document.getElementsByTagName("*");
-            for (i = 0; i < z.length; i++) {
-                elmnt = z[i];
-                /*search for elements with a certain attribute:*/
-                file = elmnt.getAttribute("w3-include-html");
-                if (file) {
-                    /*make an HTTP request using the attribute value as the file name:*/
-                    xhttp = new XMLHttpRequest();
-                    xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4 /*DONE*/) {
-                            if (this.status == 200 /*OK*/) {
-                                elmnt.innerHTML = this.responseText;
-                            }
-                            if (this.status == 404) {
-                                elmnt.innerHTML = "Page not found.";
-                            }
-                            /*remove the attribute, and call this function once more:*/
-                            //elmnt.removeAttribute("w3-include-html");
-                            //includeHTML();
+            let elmnt = document.getElementById('included-page');
+            let file = elmnt.getAttribute("w3-include-html");
+            if (file) {
+                /*make an HTTP request using the attribute value as the file name:*/
+                let xhttp = new XMLHttpRequest();
+                xhttp.onreadystatechange = function () {
+                    if (this.readyState == 4 /*DONE*/) {
+                        if (this.status == 200 /*OK*/) {
+                            elmnt.innerHTML = this.responseText;
+                        }
+                        if (this.status == 404) {
+                            elmnt.innerHTML = "Page not found.";
                         }
                     }
-                    xhttp.open("GET", file, true);
-                    xhttp.send();
-                    /*exit the function:*/
-                    return;
                 }
+                xhttp.open("GET", file, true);
+                xhttp.send();
+                return;
             }
         };
 
@@ -245,15 +212,10 @@
         let state = '<STATE>';
         let previous_state = state;
         let player_list = <PLAYER_LIST>; // it won't be bad syntax once substituted
-        //console.dir(player_list);
-        //console.log(action,state);
         let question_number = '<QUESTION_NUMBER>';
         let number_of_players = '<NUMBER_OF_PLAYERS>';
         let xhr = new XMLHttpRequest();
-        //document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
-        //includeHTML();
-        //doPageUpdate();
-        // poll every 3 seconds
+        // poll every 0.25 seconds
         setInterval(doAJAXPoll, 250);
     </script>
   </head>
