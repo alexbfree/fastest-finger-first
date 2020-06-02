@@ -8,6 +8,19 @@
 <html>
   <head>
     <title>Fastest Finger First</title>
+    <link rel="preload" as="image" href="/img/button_a_noshadow.png">
+    <link rel="preload" as="image" href="/img/button_b_noshadow.png">
+    <link rel="preload" as="image" href="/img/button_c_noshadow.png">
+    <link rel="preload" as="image" href="/img/button_d_noshadow.png">
+    <link rel="preload" as="image" href="/img/button_a.png">
+    <link rel="preload" as="image" href="/img/button_b.png">
+    <link rel="preload" as="image" href="/img/button_c.png">
+    <link rel="preload" as="image" href="/img/button_d.png">
+    <link rel="preload" as="image" href="/img/button_a_grey.png">
+    <link rel="preload" as="image" href="/img/button_b_grey.png">
+    <link rel="preload" as="image" href="/img/button_c_grey.png">
+    <link rel="preload" as="image" href="/img/button_d_grey.png">
+    <link rel="preload" as="image" href="/img/logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@600&family=Montserrat+Alternates:wght@500;600&display=swap"
           rel="stylesheet">
     <style type="text/css">
@@ -19,6 +32,75 @@
             background-color: #f0f8ff;
         }
 
+        .buttonABCD {
+          margin:3px;
+          cursor: pointer;
+          background-repeat: no-repeat;
+        }
+        #buttonA:hover {
+          background-image: url("/img/button_a_noshadow.png");
+          background-position: right bottom;
+        }
+        #buttonA {
+          background-image: url("/img/button_a.png");
+          width:125px;
+          height:90px;
+        }
+        #buttonB:hover {
+          background-image: url("/img/button_b_noshadow.png");
+          background-position: right bottom;
+        }
+        #buttonB {
+          background-image: url("/img/button_b.png");
+          width:117px;
+          height:90px;
+        }
+        #buttonC:hover {
+          background-image: url("/img/button_c_noshadow.png");
+          background-position: right bottom;
+        }
+        #buttonC {
+          background-image: url("/img/button_c.png");
+          width:119px;
+          height:90px;
+        }
+        #buttonD:hover {
+          background-image: url("/img/button_d_noshadow.png");
+          background-position: right bottom;
+        }
+        #buttonD {
+          background-image: url("/img/button_d.png");
+          width:121px;
+          height:90px;
+        }
+        #buttonA.pressed {
+          background-image: url("/img/button_a_grey.png");
+          background-position: right bottom;
+        }
+        #buttonB.pressed {
+          background-image: url("/img/button_b_grey.png");
+          background-position: right bottom;
+        }
+        #buttonC.pressed {
+          background-image: url("/img/button_c_grey.png");
+          background-position: right bottom;
+        }
+        #buttonD.pressed {
+          background-image: url("/img/button_d_grey.png");
+          background-position: right bottom;
+        }
+
+        .flex-container {
+          display: flex;
+          flex-direction:row;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        /* preload all images */
+        body::after{
+          position:absolute; width:0; height:0; overflow:hidden; z-index:-1; // hide images
+          content:url(button_a.png) url(button_a_noshadow.png) url(button_b.png) url(button_b_noshadow.png) url(button_c.png) url(button_c_noshadow.png) url(button_d.png) url(button_d_noshadow.png) url(button_a_grey.png) url(button_b_grey.png) url(button_c_grey.png) url(button_d_grey.png) url(logo.png);
+        }
         body {
             margin: 0;
             padding: 0;
@@ -96,6 +178,32 @@
                         playerListDiv.innerText = player_list.join(", ");
                       }
                     }
+                } else if (state == "answering") {
+                  // play/answering page
+                  let buttonADiv = document.getElementById("buttonA");
+                  if (buttonADiv) {
+                    buttonADiv.addEventListener("click", function() {
+                      buttonADiv.classList.add('pressed');
+                    });
+                  }
+                  let buttonBDiv = document.getElementById("buttonB");
+                  if (buttonBDiv) {
+                    buttonBDiv.addEventListener("click", function() {
+                      buttonBDiv.classList.add('pressed');
+                    });
+                  }
+                  let buttonCDiv = document.getElementById("buttonC");
+                  if (buttonCDiv) {
+                    buttonCDiv.addEventListener("click", function() {
+                      buttonCDiv.classList.add('pressed');
+                    });
+                  }
+                  let buttonDDiv = document.getElementById("buttonD");
+                  if (buttonDDiv) {
+                    buttonDDiv.addEventListener("click", function() {
+                      buttonDDiv.classList.add('pressed');
+                    });
+                  }
                 }
             }
         }
@@ -111,16 +219,16 @@
                     /*make an HTTP request using the attribute value as the file name:*/
                     xhttp = new XMLHttpRequest();
                     xhttp.onreadystatechange = function () {
-                        if (this.readyState == 4) {
-                            if (this.status == 200) {
+                        if (this.readyState == 4 /*DONE*/) {
+                            if (this.status == 200 /*OK*/) {
                                 elmnt.innerHTML = this.responseText;
                             }
                             if (this.status == 404) {
                                 elmnt.innerHTML = "Page not found.";
                             }
                             /*remove the attribute, and call this function once more:*/
-                            elmnt.removeAttribute("w3-include-html");
-                            includeHTML();
+                            //elmnt.removeAttribute("w3-include-html");
+                            //includeHTML();
                         }
                     }
                     xhttp.open("GET", file, true);
