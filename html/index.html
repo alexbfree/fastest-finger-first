@@ -6,7 +6,7 @@
     import the content of <action>/<state>.html and run its javascript (maybe just have those as methods here)
 -->
 <html>
-  <head>
+<head>
     <title>Fastest Finger First</title>
     <link rel="preload" as="image" href="/img/button_a_noshadow.png">
     <link rel="preload" as="image" href="/img/button_b_noshadow.png">
@@ -33,142 +33,185 @@
         }
 
         .buttonABCD {
-          margin:3px;
-          cursor: pointer;
-          background-repeat: no-repeat;
+            margin: 3px;
+            cursor: pointer;
+            background-repeat: no-repeat;
+            background-size: cover;
         }
+
         #buttonA:hover {
-          background-image: url("/img/button_a_noshadow.png");
-          background-position: right bottom;
+            background-image: url("/img/button_a_noshadow.png");
+            background-position: right bottom;
         }
+
         #buttonA {
-          background-image: url("/img/button_a.png");
-          width:125px;
-          height:90px;
+            background-image: url("/img/button_a.png");
+            width: 375px;
+            height: 270px;
         }
+
         #buttonB:hover {
-          background-image: url("/img/button_b_noshadow.png");
-          background-position: right bottom;
+            background-image: url("/img/button_b_noshadow.png");
+            background-position: right bottom;
         }
+
         #buttonB {
-          background-image: url("/img/button_b.png");
-          width:117px;
-          height:90px;
+            background-image: url("/img/button_b.png");
+            width: 351px;
+            height: 270px;
         }
+
         #buttonC:hover {
-          background-image: url("/img/button_c_noshadow.png");
-          background-position: right bottom;
+            background-image: url("/img/button_c_noshadow.png");
+            background-position: right bottom;
         }
+
         #buttonC {
-          background-image: url("/img/button_c.png");
-          width:119px;
-          height:90px;
+            background-image: url("/img/button_c.png");
+            width: 357px;
+            height: 270px;
         }
+
         #buttonD:hover {
-          background-image: url("/img/button_d_noshadow.png");
-          background-position: right bottom;
+            background-image: url("/img/button_d_noshadow.png");
+            background-position: right bottom;
         }
+
         #buttonD {
-          background-image: url("/img/button_d.png");
-          width:121px;
-          height:90px;
+            background-image: url("/img/button_d.png");
+            width: 363px;
+            height: 270px;
         }
+
         #buttonA.pressed {
-          background-image: url("/img/button_a_grey.png");
-          background-position: right bottom;
+            background-image: url("/img/button_a_grey.png");
+            background-position: right bottom;
         }
+
         #buttonB.pressed {
-          background-image: url("/img/button_b_grey.png");
-          background-position: right bottom;
+            background-image: url("/img/button_b_grey.png");
+            background-position: right bottom;
         }
+
         #buttonC.pressed {
-          background-image: url("/img/button_c_grey.png");
-          background-position: right bottom;
+            background-image: url("/img/button_c_grey.png");
+            background-position: right bottom;
         }
+
         #buttonD.pressed {
-          background-image: url("/img/button_d_grey.png");
-          background-position: right bottom;
+            background-image: url("/img/button_d_grey.png");
+            background-position: right bottom;
         }
 
         .flex-container {
-          display: flex;
-          flex-direction:row;
-          flex-wrap: wrap;
-          justify-content: center;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
         }
+
         body {
             margin: 0;
             padding: 0;
             padding-top: 30px;
             text-align: center;
         }
+
         div#included-page {
             width: 900px;
             /*text-align: left;*/
             border: 0px;
             padding: 0;
             margin: 0 auto;
-        }  ​
+        }
+
+        @media (pointer:none) and (orientation:portrait), (pointer:coarse) and (orientation:portrait) {
+            .flex-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        @media (pointer:none) and (orientation:portrait), (pointer:coarse) and (orientation:portrait){
+            div#included-page {
+                width: 700px;
+            }
+            .flex-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .buttonABCD {
+                margin: 15px;
+            }
+            h1 {
+                font-size: 100px;
+            }
+            p {
+                font-size: 50px;
+            }
+        }
+        ​
     </style>
     <script type="text/javascript">
         function doAJAXPoll() {
             fetch(pollURL)
-            .then(response => response.text())
-            .catch(error => {
-              console.log('poll error')
-              console.log('Request failed.  Returned error:' + error);
-            })
-            .then(response => {
-              let data = JSON.parse(response);
-              previous_state = state;
-              state = data["state"];
-              question_number = data["question_number"];
-              number_of_players = data["number_of_players"];
-              player_list = data["player_list"];
-              document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
-              if (first_time || state != previous_state) {
-                includeHTML();
-                if (first_time) {
-                  first_time = false;
-                }
-              }
-            })
+                .then(response => response.text())
+                .catch(error => {
+                    console.log('poll error')
+                    console.log('Request failed.  Returned error:' + error);
+                })
+                .then(response => {
+                    let data = JSON.parse(response);
+                    previous_state = state;
+                    state = data["state"];
+                    question_number = data["question_number"];
+                    number_of_players = data["number_of_players"];
+                    player_list = data["player_list"];
+                    document.getElementById('included-page').setAttribute('w3-include-html', `/html/${action}/${state}.html`);
+                    if (first_time || state != previous_state) {
+                        includeHTML();
+                        if (first_time) {
+                            first_time = false;
+                        }
+                    } else {
+                        doPageUpdate();
+                    }
+
+                })
         }
 
-        function doAJAXPost(url,data) {
+        function doAJAXPost(url, data) {
             let formData = new FormData();
-            for( let key in data ) {
-              let value = data[key];
-              formData.append(key, value);
+            for (let key in data) {
+                let value = data[key];
+                formData.append(key, value);
             }
             let xhreq = new XMLHttpRequest();
             xhreq.open('POST', url, true);
             xhreq.onload = function () {
-              if (xhreq.status !== 200 /*OK*/){
-                return -1;
-              }
-              return this.responseText;
+                if (xhreq.status !== 200 /*OK*/) {
+                    return -1;
+                }
+                return this.responseText;
             };
             xhreq.send(formData);
         }
 
         function postAnswerIfDone() {
-          if (answer.length==4) {
-            doAJAXPost(buttonsClickedURL, {
-              player_name: detail,
-              question_number: question_number,
-              answer: answer
-            });
-          }
+            if (answer.length == 4) {
+                doAJAXPost(buttonsClickedURL, {
+                    player_name: detail,
+                    question_number: question_number,
+                    answer: answer
+                });
+            }
         }
 
         function clickAnswerButton(event) {
-          answer = `${answer}${event.target.dataset.letter}`;
-          event.target.classList.add('pressed');
-          event.target.style.cursor = "not-allowed";
-          //event.target.removeEventListener("mouseup",clickAnswerButton);
-          //event.target.removeEventListener("touchend",clickAnswerButton);
-          postAnswerIfDone();
+            answer = `${answer}${event.target.dataset.letter}`;
+            event.target.classList.add('pressed');
+            event.target.style.cursor = "not-allowed";
+            postAnswerIfDone();
         }
 
         function doPageUpdate() {
@@ -177,39 +220,41 @@
                     // play/registration page
                     let playerListDiv = document.getElementById("players");
                     if (playerListDiv) {
-                      if (!player_list || player_list.length==0) {
-                        playerListDiv.innerText = "No-one yet.";
-                      }
-                      else {
-                        let niceNames = player_list.map(function(x) { return x.substr(0, 1).toUpperCase() + x.substr(1); });
-                        playerListDiv.innerText = niceNames.join(", ");
-                      }
+                        if (!player_list || player_list.length == 0) {
+                            playerListDiv.innerText = "No-one yet.";
+                        } else {
+                            let niceNames = player_list.map(function (x) {
+                                return x.substr(0, 1).toUpperCase() + x.substr(1);
+                            });
+                            playerListDiv.innerText = niceNames.join(", ");
+                        }
                     }
                 } else if (state == "answering") {
-                  // play/answering page
-                  let buttonADiv = document.getElementById("buttonA");
-                  if (buttonADiv) {
-                    buttonADiv.addEventListener("mouseup", clickAnswerButton, {once:true});
-                    buttonADiv.addEventListener("touchend", clickAnswerButton, {once:true});
-                  }
-                  let buttonBDiv = document.getElementById("buttonB");
-                  if (buttonBDiv) {
-                    buttonBDiv.addEventListener("mouseup", clickAnswerButton, {once:true});
-                    buttonBDiv.addEventListener("touchend", clickAnswerButton, {once:true});
-                  }
-                  let buttonCDiv = document.getElementById("buttonC");
-                  if (buttonCDiv) {
-                    buttonCDiv.addEventListener("mouseup", clickAnswerButton, {once:true});
-                    buttonCDiv.addEventListener("touchend", clickAnswerButton, {once:true});
-                  }
-                  let buttonDDiv = document.getElementById("buttonD");
-                  if (buttonDDiv) {
-                    buttonDDiv.addEventListener("mouseup", clickAnswerButton, {once:true});
-                    buttonDDiv.addEventListener("touchend", clickAnswerButton, {once:true});
-                  }
+                    // play/answering page
+                    let buttonADiv = document.getElementById("buttonA");
+                    if (buttonADiv) {
+                        buttonADiv.addEventListener("mouseup", clickAnswerButton, {once: true});
+                        buttonADiv.addEventListener("touchend", clickAnswerButton, {once: true});
+                    }
+                    let buttonBDiv = document.getElementById("buttonB");
+                    if (buttonBDiv) {
+                        buttonBDiv.addEventListener("mouseup", clickAnswerButton, {once: true});
+                        buttonBDiv.addEventListener("touchend", clickAnswerButton, {once: true});
+                    }
+                    let buttonCDiv = document.getElementById("buttonC");
+                    if (buttonCDiv) {
+                        buttonCDiv.addEventListener("mouseup", clickAnswerButton, {once: true});
+                        buttonCDiv.addEventListener("touchend", clickAnswerButton, {once: true});
+                    }
+                    let buttonDDiv = document.getElementById("buttonD");
+                    if (buttonDDiv) {
+                        buttonDDiv.addEventListener("mouseup", clickAnswerButton, {once: true});
+                        buttonDDiv.addEventListener("touchend", clickAnswerButton, {once: true});
+                    }
                 }
             }
         }
+
         function includeHTML() {
             let elmnt = document.getElementById('included-page');
             let file = elmnt.getAttribute("w3-include-html");
@@ -247,8 +292,8 @@
         // poll every 0.25 seconds
         setInterval(doAJAXPoll, 2500); // TODO CHANGE to 250
     </script>
-  </head>
-  <body>
-    <div id="included-page"></div><!-- w3-include-html='/html/<ACTION>/<STATE>.html' -->
-  </body>
+</head>
+<body>
+<div id="included-page"></div><!-- w3-include-html='/html/<ACTION>/<STATE>.html' -->
+</body>
 </html>

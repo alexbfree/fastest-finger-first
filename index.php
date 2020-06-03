@@ -34,19 +34,18 @@ function runSQL($query)
     return $response;
 }
 
-function runSQLPrepared($query_with_markers, $param1, $param2, $param3)
+function runSQLPrepared($query_with_markers, $param1, $param2 = null, $param3 = null)
 {
     global $conn;
     $stmt = mysqli_prepare($conn, $query_with_markers);
     $data = "";
     if ($param3) {
-        mysqli_stmt_bind_param($stmt, 'iss', $param1,$param2,$param3);
+        mysqli_stmt_bind_param($stmt, 'iss', $param1, $param2, $param3);
         mysqli_stmt_execute($stmt);
 
     } else {
-        mysqli_stmt_bind_param($stmt, 's', $param);
+        mysqli_stmt_bind_param($stmt, 's', $param1);
         mysqli_stmt_execute($stmt);
-        mysqli_stmt_bind_result($stmt, $data);
     }
     mysqli_stmt_fetch($stmt);
     mysqli_stmt_close($stmt);
@@ -211,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     // on initial load, register the player into the players table
                     $query = "INSERT IGNORE INTO players (player_name) VALUES(?)";
-                    @runSQLPrepared($query, $detail); // warning suppressed as it works
+                    runSQLPrepared($query, $detail);
                 }
                 break;
             }
@@ -226,7 +225,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             default:
             {
-                echo "<h2>ERROR</h2><p>You have entered an invalid web address.</p>";
+                echo "<h1>ERROR</h1><p>You have entered an invalid web address.</p>";
             }
         }
         if ($render_html) {
