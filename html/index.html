@@ -117,6 +117,10 @@
             text-align: center;
         }
 
+        h1#question, ul#options {
+            visibility: hidden;
+        }
+
         div#included-page {
             width: 900px;
             /*text-align: left;*/
@@ -228,6 +232,29 @@
             }
         }
 
+        function startRound() {
+            doAJAXPost(startRoundURL, {});
+        }
+
+        function prepareHostReadyScreen() {
+            let questionH1 = document.querySelector('h1#question');
+            if (questionH1) {
+                questionH1.innerHTML = `Question ${question_number} - Get ready.`;
+                questionH1.style.visibility = 'visible';
+            }
+            // on load, change h1#question to question X (and show it), change span#A-label to the text of option A, etc. (but don't show).
+            // on button#show-question click, change h1#question to 1. How...?
+            // on button#show-options click, set ul#options to visible.
+            // on go, post a request which will advance us to answering:1 and post a NULL row to the times table.
+        }
+
+        function enableRoundStartButton() {
+            let roundStartButtonDiv = document.getElementById("start-first");
+            if (roundStartButtonDiv) {
+                roundStartButtonDiv.addEventListener('click', startRound );
+            }
+        }
+
         function doPageUpdate() {
             if (action == "play") {
                 if (state == "registration") {
@@ -260,6 +287,9 @@
             } else if (action=="host") {
                 if (state=="registration") {
                     updatePlayerList();
+                    enableRoundStartButton();
+                } else if (state=='answering') {
+                    prepareHostReadyScreen();
                 }
             }
         }
@@ -290,12 +320,14 @@
         let first_time = true;
         let pollURL = "<POLL_URL>";
         let buttonsClickedURL = "<BUTTONS_CLICKED_URL>";
+        let startRoundURL = "<START_ROUND_URL>";
         let action = '<ACTION>';
         let state = '<STATE>';
         let detail = '<DETAIL>';
+        let questions = "<QUESTION_ARRAY>";
         let answer = "";
-        let previous_state = state;
-        let player_list = <PLAYER_LIST>; // it won't be bad syntax once substituted
+        let previous_state = "";
+        let player_list = "<PLAYER_LIST>";
         let question_number = '<QUESTION_NUMBER>';
         let number_of_players = '<NUMBER_OF_PLAYERS>';
         // poll every 0.25 seconds
