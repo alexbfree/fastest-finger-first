@@ -214,21 +214,26 @@
             postAnswerIfDone();
         }
 
+        function updatePlayerList() {
+            let playerListDiv = document.getElementById("players");
+            if (playerListDiv) {
+                if (!player_list || player_list.length == 0) {
+                    playerListDiv.innerText = "No-one yet.";
+                } else {
+                    let niceNames = player_list.map(function (x) {
+                        return x.substr(0, 1).toUpperCase() + x.substr(1);
+                    });
+                    playerListDiv.innerText = niceNames.join(", ");
+                }
+            }
+        }
+
         function doPageUpdate() {
             if (action == "play") {
                 if (state == "registration") {
                     // play/registration page
-                    let playerListDiv = document.getElementById("players");
-                    if (playerListDiv) {
-                        if (!player_list || player_list.length == 0) {
-                            playerListDiv.innerText = "No-one yet.";
-                        } else {
-                            let niceNames = player_list.map(function (x) {
-                                return x.substr(0, 1).toUpperCase() + x.substr(1);
-                            });
-                            playerListDiv.innerText = niceNames.join(", ");
-                        }
-                    }
+                    updatePlayerList();
+
                 } else if (state == "answering") {
                     // play/answering page
                     let buttonADiv = document.getElementById("buttonA");
@@ -251,6 +256,10 @@
                         buttonDDiv.addEventListener("mouseup", clickAnswerButton, {once: true});
                         buttonDDiv.addEventListener("touchend", clickAnswerButton, {once: true});
                     }
+                }
+            } else if (action=="host") {
+                if (state=="registration") {
+                    updatePlayerList();
                 }
             }
         }

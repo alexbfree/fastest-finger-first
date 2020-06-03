@@ -108,6 +108,66 @@ function stringArrayToJSArray($arr)
     return '["' . implode('", "', $arr) . '"]';
 }
 
+function get_data_and_prep_render() {
+    global $action, $detail, $state, $question_number, $number_of_players, $player_list, $page_contents, $render_html;
+    $state = getState();
+    // state can be:
+    //   "registration" - this is when players register
+    //   "ready" - for a question - showing the question but not the options. [question number is set]
+    //   "answering" - timer has started, people are answering [question number is set] [number of players answered is calculable]
+    //   "review" - when the last answer is in, show the times of answers and results & points [question number is set]
+    //   "scores" - show summary of points.
+
+    // state transitions:
+    //  "registration" -> "ready": Host advanced to 1 (by pressing ready:1 or "first question" button on host screen.
+    //  "ready" -> "answering": Host has read it out then pressed "answer" button for this question. (number of players recorded)
+    //  "answering" -> "review":  Each time a player submits an answer, the server checks if they were the last player. If so, then we shift to review state.
+    //  "review" -> "ready": Host presses "Next question/end" button on the admin/host screen
+
+    // only set if 'ready', 'answering' or 'review'
+    $question_number = getCurrentQuestion();
+
+    // only set if 'answering'
+    $number_of_players = getNumberOfPlayersAnsweringThisQuestion();
+
+    $player_list = getPlayerList();
+
+    // render the webpage (state-specific variations are in index.html)
+    $page_contents = file_get_contents("html/index.html");
+
+    // put data into the page's javascript for client-side use
+    $page_contents = str_replace("<POLL_URL>", '/poll/status', $page_contents);
+    $page_contents = str_replace("<BUTTONS_CLICKED_URL>", '/post/answer', $page_contents);
+    $page_contents = str_replace("<ACTION>", $action, $page_contents);
+    $page_contents = str_replace("<STATE>", $state, $page_contents);
+    $page_contents = str_replace("<DETAIL>", $detail, $page_contents);
+    if ($question_number) {
+        $page_contents = str_replace("<QUESTION_NUMBER>", $question_number, $page_contents);
+    } else {
+        $page_contents = str_replace("<QUESTION_NUMBER>", 'null', $page_contents);
+    }
+    if ($question_number) {
+        $page_contents = str_replace("<NUMBER_OF_PLAYERS>", $number_of_players, $page_contents);
+    } else {
+        $page_contents = str_replace("<NUMBER_OF_PLAYERS>", '0', $page_contents);
+    }
+    if ($player_list) {
+        $page_contents = str_replace("<PLAYER_LIST>", stringArrayToJSArray($player_list), $page_contents);
+    } else {
+        $page_contents = str_replace("<PLAYER_LIST>", '[]', $page_contents);
+    }
+
+    $render_html = true;
+}
+
+// global vars
+$state = null;
+$question_number = null;
+$number_of_players = null;
+$player_list = null;
+$page_contents = null;
+$render_html = null;
+
 $conn = connect();
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -138,54 +198,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $url_parts[1];
         $detail = $url_parts[2];
 
-        $state = getState();
-        // state can be:
-        //   "registration" - this is when players register
-        //   "ready" - for a question - showing the question but not the options. [question number is set]
-        //   "answering" - timer has started, people are answering [question number is set] [number of players answered is calculable]
-        //   "review" - when the last answer is in, show the times of answers and results & points [question number is set]
-        //   "scores" - show summary of points.
-
-        // state transitions:
-        //  "registration" -> "ready": Host advanced to 1 (by pressing ready:1 or "first question" button on host screen.
-        //  "ready" -> "answering": Host has read it out then pressed "answer" button for this question. (number of players recorded)
-        //  "answering" -> "review":  Each time a player submits an answer, the server checks if they were the last player. If so, then we shift to review state.
-        //  "review" -> "ready": Host presses "Next question/end" button on the admin/host screen
-
-        // only set if 'ready', 'answering' or 'review'
-        $question_number = getCurrentQuestion();
-
-        // only set if 'answering'
-        $number_of_players = getNumberOfPlayersAnsweringThisQuestion();
-
-        $player_list = getPlayerList();
-
-        // render the webpage (state-specific variations are in index.html)
-        $page_contents = file_get_contents("html/index.html");
-
-        // put data into the page's javascript for client-side use
-        $page_contents = str_replace("<POLL_URL>", '/poll/status', $page_contents);
-        $page_contents = str_replace("<BUTTONS_CLICKED_URL>", '/post/answer', $page_contents);
-        $page_contents = str_replace("<ACTION>", $action, $page_contents);
-        $page_contents = str_replace("<STATE>", $state, $page_contents);
-        $page_contents = str_replace("<DETAIL>", $detail, $page_contents);
-        if ($question_number) {
-            $page_contents = str_replace("<QUESTION_NUMBER>", $question_number, $page_contents);
-        } else {
-            $page_contents = str_replace("<QUESTION_NUMBER>", 'null', $page_contents);
-        }
-        if ($question_number) {
-            $page_contents = str_replace("<NUMBER_OF_PLAYERS>", $number_of_players, $page_contents);
-        } else {
-            $page_contents = str_replace("<NUMBER_OF_PLAYERS>", '0', $page_contents);
-        }
-        if ($player_list) {
-            $page_contents = str_replace("<PLAYER_LIST>", stringArrayToJSArray($player_list), $page_contents);
-        } else {
-            $page_contents = str_replace("<PLAYER_LIST>", '[]', $page_contents);
-        }
-
-        $render_html = true;
+        get_data_and_prep_render();
 
         // server side state specific actions
         switch ($action) {
@@ -214,24 +227,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
             }
-            case "view":
-            {
-                break;
-            }
-            case "host":
-            {
-                // host
-                break;
-            }
             default:
             {
-                echo "<h1>ERROR</h1><p>You have entered an invalid web address.</p>";
+                echo "<h1>ERROR</h1><p>You have entered an invalid web address. Try: <span style='font-family:Arial;color:green;'>http://fastestfingerfirst.alexbowyer.com/play/yourname</span></p>";
             }
         }
         if ($render_html) {
             // render the page to the browser
             echo $page_contents . "<!-- end of render -->";
         }
+    } else if (count($url_parts) == 2) {
+        $action = $url_parts[1];
+        if ($action=="host") {
+            get_data_and_prep_render();
+            // host is active
+            if ($render_html) {
+                // render the page to the browser
+                echo $page_contents . "<!-- end of render -->";
+            }
+        } else {
+            echo "<h1>ERROR</h1><p>You have entered an invalid web address. Try: <span style='font-family:Arial;color:green;;'>http://fastestfingerfirst.alexbowyer.com/play/yourname</span></p>";
+        }
+    } else {
+      echo "<h1>ERROR</h1><p>You have entered an invalid web address. Try: <span style='font-family:Arial;color:green;;'>http://fastestfingerfirst.alexbowyer.com/play/yourname</span></p>";
     }
 }
 disconnect($conn);
